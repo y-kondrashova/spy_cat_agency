@@ -29,7 +29,7 @@ Follow these instructions to set up and run the project locally.
 
 - Python 3.8+
 - Pipenv (or pip)
-- PostgreSQL (optional; default is SQLite)
+- SQLite default
 
 ### Installation
 
@@ -46,11 +46,9 @@ Follow these instructions to set up and run the project locally.
    pip install django djangorestframework
     ```
 
-3. Configure the `.env` file with your database credentials (if using PostgreSQL):
+3. Configure the `.env` file with your [api key](https://thecatapi.com/):
     ```env
-    DATABASE_URL=postgres://username:password@localhost:5432/spy_cat_db
-    SECRET_KEY=your_secret_key
-    DEBUG=True
+    CAT_API_KEY=your_secret_key
     ```
 
 4. Apply migrations:
@@ -58,7 +56,7 @@ Follow these instructions to set up and run the project locally.
     python manage.py migrate
     ```
 
-6. Run the development server:
+5. Run the development server:
     ```bash
     python manage.py runserver
     ```
