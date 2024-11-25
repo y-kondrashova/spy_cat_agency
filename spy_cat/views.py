@@ -6,8 +6,8 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 
-from .models import SpyCat, Mission
-from .serializers import SpyCatSerializer, MissionSerializer
+from .models import SpyCat, Mission, Target
+from .serializers import SpyCatSerializer, MissionSerializer, TargetSerializer
 
 
 class SpyCatListCreateView(ListCreateAPIView):
@@ -59,3 +59,79 @@ class MissionViewSet(viewsets.ModelViewSet):
         return Response({'message': 'Cat assigned successfully.'})
 
 
+class TargetViewSet(viewsets.ViewSet):
+    def list(self, request, mission_id=None):
+        targets = Target.objects.filter(mission_id=mission_id)
+        serializer = TargetSerializer(targets, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, mission_id=None, pk=None):
+        try:
+            target = Target.objects.get(mission_id=mission_id, pk=pk)
+        except Target.DoesNotExist:
+            return Response(
+                {'error': 'Target not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = TargetSerializer(target)
+        return Response(serializer.data)
+
+    def create(self, request, mission_id=None):
+        data = request.data
+        data['mission'] = mission_id
+        serializer = TargetSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def update(self, request, mission_id=None, pk=None):
+        try:
+            target = Target.objects.get(mission_id=mission_id, pk=pk)
+        except Target.DoesNotExist:
+            return Response(
+                {'error': 'Target not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = TargetSerializer(
+            target,
+            data=request.data,
+            partial=False
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(detail=True, methods=['patch'], url_path='mark-complete')
+    def mark_complete(self, request, mission_id=None, pk=None):
+        try:
+            target = Target.objects.get(mission_id=mission_id, pk=pk)
+        except Target.DoesNotExist:
+            return Response(
+                {'error': 'Target not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if target.complete:
+            return Response(
+                {'error': 'Target already marked as complete'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        target.complete = True
+        target.save()
+        return Response(
+            {'message': 'Target marked as complete'},
+            status=status.HTTP_200_OK
+        )
