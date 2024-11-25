@@ -41,8 +41,9 @@ Follow these instructions to set up and run the project locally.
 
 2. Create a virtual environment and install dependencies:
     ```bash
-    pipenv install
-    pipenv shell
+    python3 -m venv venv
+    source venv/bin/activate
+   pip install django djangorestframework
     ```
 
 3. Configure the `.env` file with your database credentials (if using PostgreSQL):
